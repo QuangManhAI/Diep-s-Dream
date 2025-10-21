@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./coffee-backend
+    container_name: coffee-backend
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./coffee-backend/.env
+    networks:
+      - coffee_net
+
+  frontend:
+    build: ./coffee-frontend
+    container_name: coffee-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - coffee_net
+
+networks:
+  coffee_net:
+    driver: bridge
