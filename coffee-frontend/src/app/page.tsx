@@ -6,37 +6,67 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="flex flex-col items-center w-full">
-{/* 🟤 HEADER / NAVBAR TỐI GIẢN */}
-<header className="flex justify-between items-center w-full px-8 py-4 border-b border-gray-200 bg-white sticky top-0 z-50">
-  {/* Logo + brand */}
-  <div className="flex items-center space-x-2">
-    <Image
-      src="/coffee_chi_yeu_logo(2).png"
-      alt="Điệp's Dream Logo"
-      width={48}
-      height={48}
-      className="object-contain"
-    />
-    <span className="font-semibold text-lg tracking-wide text-[#2F2A2C]">
-      Điệp&apos;s Dream
-    </span>
-  </div>
+{/* 🟤 HEADER / NAVBAR TỐI GIẢN & SANG HƠN */}
+<header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm transition-all">
+  <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex justify-between items-center">
+    
+    {/* Logo + Brand */}
+    <div className="flex items-center space-x-3">
+      <Image
+        src="/coffee_chi_yeu_logo(2).png"
+        alt="Điệp's Dream Logo"
+        width={42}
+        height={42}
+        className="object-contain"
+      />
+      <span className="font-semibold text-lg md:text-xl tracking-wide text-[#2F2A2C]">
+        Điệp&apos;s Dream
+      </span>
+    </div>
 
-  {/* Navigation */}
-  <nav className="flex space-x-6 text-sm font-medium text-[#2F2A2C]">
-    <Link href="/menu" className="hover:text-amber-700">
-      Menu
-    </Link>
-    <Link href="/login" className="hover:text-amber-700">
-      Đăng nhập
-    </Link>
-    <Link
-      href="/register"
-      className="bg-amber-700 text-white px-3 py-1 rounded hover:bg-amber-800"
-    >
-      Đăng ký
-    </Link>
-  </nav>
+    {/* Navigation */}
+    <nav className="hidden md:flex items-center space-x-8 font-medium text-sm text-[#2F2A2C]">
+      <Link
+        href="/"
+        className="hover:text-amber-700 transition-colors"
+      >
+        Trang chủ
+      </Link>
+      <Link
+        href="/menu"
+        className="hover:text-amber-700 transition-colors"
+      >
+        Menu
+      </Link>
+      <Link
+        href="/login"
+        className="hover:text-amber-700 transition-colors"
+      >
+        Đăng nhập
+      </Link>
+      <Link
+        href="/register"
+        className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-1.5 rounded-full shadow-sm transition-all"
+      >
+        Đăng ký
+      </Link>
+    </nav>
+
+    {/* Icon / Mobile toggle */}
+    <div className="md:hidden flex items-center space-x-2">
+      <button className="p-2 rounded-md hover:bg-gray-100">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6 text-[#2F2A2C]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8h16M4 16h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
 </header>
 
 {/* 🟤 SECTION 1 — POSTER THƯƠNG HIỆU */}

@@ -7,31 +7,39 @@ import { Roles } from "../auth/roles.decorator";
 @UseGuards(JwtAuthGuard)
 @Controller("Order")
 export class OrdersController {
-    constructor(private readonly service: OdersService){}
+  constructor(private readonly service: OdersService) {}
 
-    @Post()
-    async createOrder(@Req() req, @Body() order: any){
-        const userId = req.user.userId;
-        return this.service.createOrderWithUser(userId, order);
-    }
+  @Post()
+  async createOrder(@Req() req, @Body() order: any) {
+    const userId = req.user.userId;
+    return this.service.createOrderWithUser(userId, order);
+  }
 
-    @Get()
-    async getRecentOrders(){
-        return this.service.findTenOrdersRecent();
-    } 
+  @UseGuards(RolesGuard)
+  @Roles("admin")
+  @Get()
+  async getAllOrders() {
+    console.log("📦 [Admin] getAllOrders called");
+    return this.service.findAllOrders(); 
+  }
 
-    @UseGuards(RolesGuard)
-    @Roles("admin")
-    @Get("search")
-    async findByPhone(@Query("phone") phone: string){
-        return this.service.findOrderByPhone(phone);
-    }
+  @UseGuards(RolesGuard)
+  @Roles("admin")
+  @Get("search")
+  async searchOrders(@Query("query") query: string) {
+    return this.service.searchOrders(query);
+  }
 
-    // focus on
-    @UseGuards(RolesGuard)
-    @Roles("admin")
-    @Patch(":id/status")
-    async updateStatus(@Param("id") id: string, @Body("status") status: string){
-        return this.service.updateStatusOrder(id, status);
-    }
+  @UseGuards(RolesGuard)
+  @Roles("admin")
+  @Patch(":id/status")
+  async updateStatus(@Param("id") id: string, @Body("status") status: string) {
+    return this.service.updateStatusOrder(id, status);
+  }
+
+  @Get("my")
+  async getUserOrders(@Req() req) {
+    const userId = req.user.userId;
+    return this.service.findOrdersByUser(userId);
+  }
 }

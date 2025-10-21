@@ -12,24 +12,21 @@ export class MenuController {
     async getAll() {
         return this.service.findAll();
     }
-    @UseGuards(JwtAuthGuard)
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles("admin")
     @Post()
     async createItem(@Body() body: any){
         return this.service.create(body);
     }
 
-    @UseGuards(JwtAuthGuard)
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles("admin")
     @Patch(":id")
     async updateItem(@Param("id") id: string, @Body() body: any){
         return this.service.update(id, body);
     }
     
-    @UseGuards(JwtAuthGuard)
-    @UseGuards(RolesGuard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles("admin")
     @Delete(":id")
     async deleteItem(@Param("id") id: string){

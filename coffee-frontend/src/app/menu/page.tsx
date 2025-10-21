@@ -20,6 +20,20 @@ export default function MenuPage() {
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [activeCat, setActiveCat] = useState("coffee");
   const [cart, setCart] = useState<MenuItem[]>([]);
+
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", price: "", imagePath: "", category: "" });
+
+  function openEdit(item: MenuItem) {
+    setEditingItem(item);
+    setEditForm({
+      name: item.name,
+      price: String(item.price),
+      imagePath: item.imagePath || "",
+      category: item.category,
+    });
+  }
+  
   const router = useRouter();
 
   // === FETCH MENU ===
@@ -72,6 +86,31 @@ export default function MenuPage() {
     } catch (e: any) {
       console.error("Lỗi khi thêm vào giỏ hàng:", e);
       toast.error(e.message || "❌ Có lỗi xảy ra khi thêm vào giỏ hàng!");
+    }
+  }
+
+  async function updateMenuItem(id: string, data: any) {
+    const token = sessionStorage.getItem("accessToken");
+    if (!token) {
+      toast.error("⚠️ Bạn chưa đăng nhập với quyền admin!");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/menu/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error("Cập nhật thất bại!");
+      toast.success("✅ Cập nhật thành công!");
+      await fetchMenu();
+    } catch (err: any) {
+      toast.error(err.message || "Không thể cập nhật món!");
     }
   }
 
@@ -141,43 +180,45 @@ export default function MenuPage() {
           </ul>
         </aside>
 
-        {/* MENU GRID */}
-        <section className="flex-1 p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filtered.length === 0 ? (
-            <p className="text-gray-500 col-span-full text-center">
-              Đang tải menu...
-            </p>
-          ) : (
-            filtered.map((item) => (
-              <div
-                key={`${item.id || item.name}`}
-                className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition"
-              >
-                <div className="aspect-square w-full bg-[#f8f5f0] flex items-center justify-center rounded-xl mb-4 overflow-hidden">
-                  <Image
-                    src={item.imagePath || "/coffee_placeholder.png"}
-                    alt={item.name}
-                    width={220}
-                    height={220}
-                    className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
-                    unoptimized
-                  />
-                </div>
+{/* MENU GRID */}
+<section className="flex-1 p-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+  {filtered.length === 0 ? (
+    <p className="text-gray-500 col-span-full text-center">Đang tải menu...</p>
+  ) : (
+    filtered.map((item) => (
+      <div
+        key={`${item.id || item.name}`}
+        className="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-1"
+      >
+        <div className="w-full flex justify-center mb-3">
+          <div className="w-40 h-40 rounded-full overflow-hidden border-[3px] border-amber-100 shadow-sm flex items-center justify-center bg-[#f8f5f0]">
+            <Image
+              src={item.imagePath || "/coffee_placeholder.png"}
+              alt={item.name}
+              width={160}
+              height={160}
+              className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+              unoptimized
+            />
+          </div>
+        </div>
 
-                <h3 className="font-semibold text-lg text-amber-900 truncate">
-                  {item.name}
-                </h3>
-                <p className="text-gray-700 mb-3">{item.price}k</p>
-                <button
-                  onClick={() => addToCart(item)}
-                  className="w-full bg-amber-700 hover:bg-amber-800 text-white py-2 rounded-md text-sm font-semibold transition"
-                >
-                  🛒 Thêm vào giỏ
-                </button>
-              </div>
-            ))
-          )}
-        </section>
+
+        <h3 className="font-semibold text-lg text-amber-900 text-center truncate">
+          {item.name}
+        </h3>
+        <p className="text-gray-700 mb-3 text-center">{item.price}k</p>
+        <button
+          onClick={() => addToCart(item)}
+          className="w-full bg-amber-700 hover:bg-amber-800 text-white py-2 rounded-full text-sm font-semibold transition"
+        >
+          🛒 Thêm vào giỏ
+        </button>
+      </div>
+    ))
+  )}
+</section>
+
       </div>
 
       {/* FOOTER */}

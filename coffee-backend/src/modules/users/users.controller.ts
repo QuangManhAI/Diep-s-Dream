@@ -1,4 +1,4 @@
-import { Controller, Post, Body, BadRequestException } from "@nestjs/common";
+import { Controller, Post, Body, BadRequestException, Delete, Param, Put, Get } from "@nestjs/common";
 import { RegisterUserDto, LoginUserDto } from "./users.dto";
 import { UserService } from "./users.service";
 import { AuthService } from "../auth/auth.service";
@@ -26,5 +26,24 @@ export class UserController {
     } catch (e) {
       throw new BadRequestException(e.message);
     }
+  }
+  @Delete(':id')
+  async deleteUser(@Param("id") id: string){
+    return this.userService.deleteUser(id);
+  }
+
+  @Put(':id')
+  async updateUser(@Param("id") id: string, @Body() body: any){
+    return this.userService.updateInfo(id, body);
+  }
+
+  @Get("email/:email")
+    async findByEmail(@Param("email") email: string) {
+      return this.userService.findByEmail(email);
+  }
+
+  @Get("phone/:phoneNumber")
+    async findByPhone(@Param("phoneNumber") phoneNumber: string) {
+      return this.userService.findByPhone(phoneNumber);
   }
 }

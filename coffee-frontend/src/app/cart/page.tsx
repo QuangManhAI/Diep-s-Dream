@@ -69,7 +69,7 @@ export default function CartPage() {
     const token = sessionStorage.getItem("accessToken");
     if (!token) return;
     try {
-      const res = await fetch(`${BASE_URL}/Order`, {
+      const res = await fetch(`${BASE_URL}/Order/my`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
