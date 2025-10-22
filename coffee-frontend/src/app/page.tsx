@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <main className="flex flex-col items-center w-full">
-{/* 🟤 HEADER / NAVBAR TỐI GIẢN & SANG HƠN */}
+{/* HEADER / NAVBAR TỐI GIẢN & SANG HƠN */}
 <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm transition-all">
   <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex justify-between items-center">
     
@@ -69,19 +69,19 @@ export default function HomePage() {
   </div>
 </header>
 
-{/* 🟤 SECTION 1 — POSTER THƯƠNG HIỆU */}
+{/* SECTION 1 — POSTER THƯƠNG HIỆU */}
 <section className="relative w-full h-[85vh] flex flex-col items-center justify-center bg-gradient-to-b from-[#f9f6f2] to-[#f4e9de] text-center text-amber-900 overflow-hidden">
   {/* 🌤 Lớp ánh sáng mờ pastel */}
   <div className="absolute inset-0 bg-[linear-gradient(115deg,#f9f6f2_0%,#f4e9de_30%,#f6d9c7_60%,#f9f6f2_100%)] opacity-80 blur-sm"></div>
 
-  {/* ✨ Tiêu đề thương hiệu */}
+  {/* Tiêu đề thương hiệu */}
   <h1
     className="relative text-6xl md:text-8xl mb-3 tracking-wide drop-shadow-sm"
     style={{ fontFamily: '"Great Vibes", cursive' }}
   >
     Điệp&apos;s Dream
 
-    {/* 🦋 Bướm đậu nhẹ cuối chữ “m” */}
+    {/* Bướm đậu nhẹ cuối chữ “m” */}
     <div className="absolute -right-6 -top-8 md:-right-32 md:-top-12 opacity-90">
       <Image
         src="/Coffee_chi_yeu(5).png"
@@ -93,12 +93,12 @@ export default function HomePage() {
     </div>
   </h1>
 
-  {/* ☕ Dòng phụ */}
+  {/* Dòng phụ */}
   <p className="uppercase tracking-[.25em] text-lg text-amber-800 mb-6 relative">
     Coffee &amp; More
   </p>
 
-  {/* 🔘 Nút xem menu */}
+  {/* Nút xem menu */}
   <Link
     href="/menu"
     className="bg-amber-700 hover:bg-amber-800 text-white px-6 py-3 rounded-full font-semibold transition relative"
@@ -106,7 +106,7 @@ export default function HomePage() {
     Xem menu
   </Link>
 
-  {/* 💫 Keyframes bay nhẹ */}
+  {/* Keyframes bay nhẹ */}
   <style jsx>{`
     @keyframes float {
       0%, 100% {
@@ -120,7 +120,7 @@ export default function HomePage() {
   
 </section>
 
-      {/* 🟤 SECTION 2 — GIỚI THIỆU / NỘI DUNG GIỮA */}
+      {/* SECTION 2 — GIỚI THIỆU / NỘI DUNG GIỮA */}
       <section className="flex flex-col md:flex-row items-center justify-center w-full py-20 px-6 bg-[#faf7f3] gap-10">
         <div className="w-full md:w-1/2 text-center md:text-left space-y-4">
           <h2 className="text-3xl font-semibold text-amber-900">
@@ -150,7 +150,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 🟤 SECTION 3 — ẢNH ĐƠN HÀNG / KHUYẾN MÃI */}
+      {/* SECTION 3 — ẢNH ĐƠN HÀNG / KHUYẾN MÃI */}
       <section className="flex flex-col md:flex-row items-center justify-between w-full bg-white py-20 px-8 border-t border-gray-100">
         <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
           <Image
@@ -164,7 +164,7 @@ export default function HomePage() {
 
         <div className="w-full md:w-1/2 text-center md:text-left md:pl-10 space-y-4">
           <h3 className="text-3xl font-semibold text-amber-900">
-            Ưu đãi tháng này 🌿
+            Ưu đãi tháng này
           </h3>
           <p className="text-gray-700 max-w-md leading-relaxed">
             Chào mừng bạn đến với Diep's Dream Coffee!
@@ -182,7 +182,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 🟤 SECTION 3 — ẢNH ĐƠN HÀNG / KHUYẾN MÃI */}
+      {/* SECTION 3 — ẢNH ĐƠN HÀNG / KHUYẾN MÃI */}
       <section className="flex flex-col md:flex-row-reverse items-center justify-between w-full bg-[#f8eee4] py-20 px-8 border-t border-[#e6d3c2]">
         {/* Ảnh bên phải */}
         <div className="w-full md:w-1/2 flex justify-center mb-8 md:mb-0">
@@ -198,7 +198,7 @@ export default function HomePage() {
         {/* Nội dung bên trái */}
         <div className="w-full md:w-1/2 text-center md:text-left md:pr-10 space-y-4">
           <h3 className="text-3xl font-semibold text-[#3d2f2f] drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-            Ưu đãi tháng này 🌿
+            Ưu đãi tháng này
           </h3>
 
           <p className="text-[#4a3d3d] max-w-md leading-relaxed">
@@ -216,7 +216,7 @@ export default function HomePage() {
       </section>
 
 
-      {/* 🟤 FOOTER */}
+      {/* FOOTER */}
       <footer className="w-full py-6 bg-[#2c1a0c] text-center text-gray-200 text-sm">
         © {new Date().getFullYear()} Điệp&apos;s Dream Coffee & More.  
         Tất cả các quyền được bảo lưu.

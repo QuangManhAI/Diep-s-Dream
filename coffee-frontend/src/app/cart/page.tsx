@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 type CartItem = {
   name: string;
@@ -33,7 +33,6 @@ export default function CartPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [message, setMessage] = useState("");
 
-  // 🧠 Kiểm tra login
   useEffect(() => {
     const token = sessionStorage.getItem("accessToken") || window.name;
     if (!token) {
@@ -44,7 +43,6 @@ export default function CartPage() {
     fetchOrders();
   }, []);
 
-  // 🛒 Lấy giỏ hàng
   async function fetchCart() {
     const token = sessionStorage.getItem("accessToken");
     if (!token) return;
@@ -64,7 +62,6 @@ export default function CartPage() {
     }
   }
 
-  // 📜 Lấy lịch sử đơn hàng gần nhất
   async function fetchOrders() {
     const token = sessionStorage.getItem("accessToken");
     if (!token) return;
@@ -124,7 +121,6 @@ export default function CartPage() {
     setCart({ items: [], total: 0 });
   }
 
-  // 💳 Đặt hàng
   async function checkout() {
     const token = sessionStorage.getItem("accessToken");
     if (!token) return router.push("/login");
@@ -153,12 +149,12 @@ export default function CartPage() {
       });
 
       if (!res.ok) throw new Error("Không thể tạo đơn hàng!");
-      setMessage("✅ Đặt hàng thành công!");
+      setMessage("Đặt hàng thành công!");
       await clearCart();
-      await fetchOrders(); // cập nhật lịch sử mới nhất
+      await fetchOrders();
     } catch (err) {
       console.error(err);
-      setMessage("❌ Đặt hàng thất bại. Vui lòng thử lại!");
+      setMessage(" Đặt hàng thất bại. Vui lòng thử lại!");
     } finally {
       setCheckoutLoading(false);
     }
@@ -183,7 +179,7 @@ export default function CartPage() {
           <p className="text-center text-gray-500">Đang tải...</p>
         ) : (
           <>
-            {/* 🛍️ Giỏ hàng */}
+            {/* Giỏ hàng */}
             {!cart || cart.items.length === 0 ? (
               <p className="text-center text-gray-600">Giỏ hàng của bạn trống.</p>
             ) : (
@@ -252,7 +248,7 @@ export default function CartPage() {
                     onClick={clearCart}
                     className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
                   >
-                    🧹 Xóa tất cả
+                    Xóa tất cả
                   </button>
                   <button
                     onClick={checkout}
@@ -273,11 +269,11 @@ export default function CartPage() {
               </div>
             )}
 
-{/* 🧾 Lịch sử đơn hàng */}
+{/* Lịch sử đơn hàng */}
 {orders.length > 0 && (
   <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-6">
     <h2 className="text-lg font-semibold mb-4 text-amber-800">
-      📜 Lịch sử đặt hàng gần đây
+      Lịch sử đặt hàng gần đây
     </h2>
     <ul className="space-y-4">
       {orders.map((o) => (
@@ -288,7 +284,7 @@ export default function CartPage() {
           {/* 🔸 Thông tin chung */}
           <div className="flex justify-between items-center mb-2">
             <span className="font-semibold text-amber-700">
-              🧾 Mã đơn: {o._id.slice(-6).toUpperCase()}
+              Mã đơn: {o._id.slice(-6).toUpperCase()}
             </span>
             <span
               className={`text-sm px-2 py-1 rounded ${
@@ -321,10 +317,10 @@ export default function CartPage() {
             ))}
           </div>
 
-          {/* 🔸 Tổng tiền + thời gian */}
+          {/* Tổng tiền + thời gian */}
           <div className="flex justify-between items-center mt-3 text-sm text-gray-600">
             <span>
-              🕒 {new Date(o.createdAt).toLocaleString("vi-VN")}
+              {new Date(o.createdAt).toLocaleString("vi-VN")}
             </span>
             <span className="font-semibold text-amber-800">
               Tổng: {o.total}k

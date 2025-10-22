@@ -16,7 +16,6 @@ export function UserMenu() {
     const role = sessionStorage.getItem("role");
     if (token && email) setUser({ email, fullName: fullName || "", role: role || "user" });
 
-    // Đóng dropdown khi click ra ngoài
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
     };
@@ -33,7 +32,7 @@ export function UserMenu() {
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* 🧍‍♂️ Avatar / Icon */}
+      {/* Avatar / Icon */}
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 focus:outline-none"
@@ -52,7 +51,7 @@ export function UserMenu() {
         )}
       </button>
 
-      {/* 🔽 Dropdown */}
+      {/* Dropdown */}
       {open && (
         <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 shadow-md rounded-lg overflow-hidden z-50">
           {user ? (

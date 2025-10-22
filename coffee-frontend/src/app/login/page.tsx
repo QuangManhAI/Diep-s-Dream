@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export default function LoginPage() {
     const router = useRouter();
@@ -52,7 +52,7 @@ export default function LoginPage() {
   }
  return (
     <main className="flex flex-col min-h-screen bg-gradient-to-b from-[#f9f6f2] to-[#f4e9de] text-[#2F2A2C]">
-      {/* 🟤 HEADER */}
+      {/* HEADER */}
       <header className="flex justify-between items-center w-full px-8 py-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="flex items-center space-x-2">
           <Image
@@ -74,7 +74,7 @@ export default function LoginPage() {
         </nav>
       </header>
 
-      {/* 🟤 FORM LOGIN */}
+      {/* FORM LOGIN */}
       <section className="flex flex-1 justify-center items-center px-6">
         <form
           onSubmit={handleLogin}
@@ -133,7 +133,7 @@ export default function LoginPage() {
         </form>
       </section>
 
-      {/* 🟤 FOOTER */}
+      {/* FOOTER */}
       <footer className="w-full py-6 bg-[#2c1a0c] text-center text-gray-200 text-sm">
         © {new Date().getFullYear()} Điệp&apos;s Dream Coffee & More.  
         Tất cả các quyền được bảo lưu.

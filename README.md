@@ -78,3 +78,420 @@
     * Khi có lỗi, quay lại trạng thái ổn định chỉ trong vài phút.
 
 **Áp dụng DevOps là bước tiến tất yếu để mọi nhóm phát triển hiện đại rút ngắn khoảng cách giữa code xong và triển khai sản phẩm tới người dùng, nhanh mà ổn định và an tòan.**
+
+## 6. Ứng dụng minh họa cho CRUD (User).
+* Với sự gợi ý từ một người quen, đồng thời cần một dự án để chuẩn bị cho một dự án DeOps, em đang làm một trang đặt đơn coffee. Trước hết là cho nhiệm vụ này với phần trình bày về `User` (CRUD). Ngoài ra còn có Thực đơn (`Menu`), Giỏ hàng (`Cart`), Phân quyền và Xác Thực (`Auth`), Đặt đơn (`Order`). 
+
+* Dự án coffee với hai phân BE và FE (**Thực hiện hóa ý tưởng, bố cục, chức năng nút và css dưới sự hỗ trợ của GPT**) có cấu trúc như mục cơ bản như sau:
+```
+coffee/
+├── docker-compose.yml                # Quản lý multi-service stack 
+│
+├── coffee-backend/
+│   ├── Dockerfile                    # Dockerfile cho NestJS backend
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env                          # Env file chứa MONGO_URI, JWT_SECRET, PORT
+│   ├── src/
+│   │   ├── main.ts                   # Entry point của ứng dụng NestJS
+│   │   ├── app.module.ts             # Module gốc, import toàn bộ module con
+│   │   │
+│   │   ├── config/
+│   │   │   └── database.config.ts    # Cấu hình Mongoose (connect tới MongoDB)
+│   │   │
+│   │   ├── modules/
+│   │   │   ├── auth/                 # Xác thực người dùng (JWT, guard, roles)
+│   │   │   ├── users/                # CRUD người dùng
+│   │   │   ├── menu/                 # CRUD món trong menu - Đây là thứ được trình bày.
+│   │   │   ├── cart/                 # Giỏ hàng người dùng
+│   │   │   └── orders/               # Đơn hàng & quản lý trạng thái
+│   │   │
+│   │   └── scripts/
+│   │       └── seedAdmin.ts          # Script tạo tài khoản admin mặc định
+│   │
+│   └── README.md
+│
+├── coffee-frontend/
+│   ├── Dockerfile                    # Dockerfile cho Next.js frontend
+│   ├── package.json
+│   ├── next.config.mjs
+│   ├── public/
+│   │   └── images/                   # Ảnh banner, logo, sản phẩm
+│   └── src/
+│       ├── app/
+│       │   ├── page.tsx              # Trang Home
+│       │   ├── login/page.tsx        # Trang đăng nhập
+│       │   ├── register/page.tsx     # Trang đăng ký
+│       │   ├── menu/page.tsx         # Danh sách món, thêm vào giỏ
+│       │   ├── cart/page.tsx         # Giỏ hàng + checkout
+│       │   ├── profile/page.tsx      # Hồ sơ người dùng
+│       │   ├── admin/page.tsx        # Quản trị menu & đơn hàng
+│       │   └── components/
+│       │       └── UserMenu.tsx      # Dropdown user info / logout
+│       └── styles/
+│           └── globals.css        
+│
+└── README.md                         # Tài liệu hướng dẫn build & deploy
+
+```
+### **Trong đó, module User gồm 5 file:**
+* `user.dto.ts`: 
+    * Hai lớp `LoginUserDto` và `RegisterUserDto` định nghĩa cấu trúc dữ liệu khi người dùng gửi yêu cầu đăng nhập và đăng ký.
+    * Chúng sử dụng `class-validator` để kiểm tra tính hợp lệ của đầu vào, giúp hệ thống ổn định và tránh lỗi runtime.
+* `users.schema.ts`: Schema này định nghĩa mô hình `User` trong MongoDB với các ràng buộc cần thiết điển hình như:
+    * `email` phải duy nhất và bắt buộc.
+    * `passwordHash` lưu mật khẩu đã mã hóa.
+    * `role` mặc định là `user`, có thể gán `admin` cho tài khoản quản trị.
+```
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+
+export type UserDocument = User & Document & {_id: string};
+@Schema({timestamps: true})
+export class User {
+    @Prop({required: true, unique: true})
+    email: string;
+
+    @Prop({required: true})
+    passwordHash: string;
+
+    @Prop({required: true})
+    fullName: string;
+
+    @Prop({required: true})
+    phoneNumber: string;
+
+    @Prop({required: true})
+    address: string;
+
+    @Prop({ default: 'user', enum: ['user', 'admin'] })
+    role: string;
+}
+
+export const UserSchema =  SchemaFactory.createForClass(User);
+```
+
+* `users.service.ts`: 
+    * Chịu trách nhiệm quản lý toàn bộ nghiệp vụ người dùng, bao gồm: đăng ký, đăng nhập, cập nhật thông tin, tìm kiếm và xóa tài khoản.
+Dịch vụ này làm việc trực tiếp với MongoDB thông qua `Mongoose`, đồng thời sử dụng `AuthService` để sinh token JWT.
+```
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { UnauthorizedException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import * as bcrypt from "bcrypt";
+import { User, UserDocument } from "./users.schema";
+import { AuthService } from "../auth/auth.service";
+import { NotFoundException } from "@nestjs/common";
+
+@Injectable()
+export class UserService{
+    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>, private authService: AuthService) {}
+    async register(email: string, password: string, fullName: string, phoneNumber: string, address: string): Promise<UserDocument> {
+        const passwordHash = await bcrypt.hash(password, 10);
+        const user = new this.userModel({email, passwordHash, fullName, phoneNumber, address});
+        try {
+            return await user.save();
+        } catch (e: any){
+            if (e.code === 11000) {
+                throw new BadRequestException("Email đã được đăng ký trước đó");
+            }
+            throw e;  
+        }
+    }
+
+    async login(email: string, password: string){
+        const user = await this.userModel.findOne({email}).exec();
+        if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+            throw new UnauthorizedException("Email hoặc mật khẩu không chính xác");
+        }
+
+        const token = this.authService.generateToken({id: user._id.toString(), email: user.email, phone: user.phoneNumber, role: user.role});
+        return {id: user._id.toString(), email: user.email, fullName: user.fullName, phoneNumber: user.phoneNumber, address: user.address, accessToken: token, role: user.role}
+    }
+
+    async deleteUser(id: string){
+        return this.userModel.findByIdAndDelete(id);
+    }
+
+    async updateInfo(id: string, data: Partial<User>){
+        if (data["password"]) {
+        const passwordHash = await bcrypt.hash(data["password"], 10);
+        data["passwordHash"] = passwordHash;
+        delete data["password"];
+        }
+
+        const updated = await this.userModel.findByIdAndUpdate(id, data, { new: true });
+        if (!updated) throw new NotFoundException("Không tìm thấy người dùng để cập nhật");
+        return updated;
+    }
+
+    async findByEmail(email: string) {
+        const user = await this.userModel.findOne({ email }).select("-passwordHash");
+        if (!user) throw new NotFoundException("Không tìm thấy người dùng với email này");
+        return user;
+    }
+
+    async findByPhone(phoneNumber: string) {
+        const user = await this.userModel.findOne({ phoneNumber }).select("-passwordHash");
+        if (!user) throw new NotFoundException("Không tìm thấy người dùng với số điện thoại này");
+        return user;
+    }
+}
+```
+
+* `users.controller.ts`: 
+    * Controller này định nghĩa các endpoint chính cho nghiệp vụ người dùng — nơi frontend gửi yêu cầu RESTful tới.
+    Nó liên kết với `UserService`, `AuthService`, và `CartService` để thực hiện đăng ký, đăng nhập, cập nhật, xóa và tìm kiếm người dùng.
+    * Cũng là nơi thể hiện CRUD User trong hệ thống.
+
+        | Hành động  | Endpoint                                                           | HTTP Method | Mô tả ngắn                         |
+        | ---------- | ------------------------------------------------------------------ | ----------- | ---------------------------------- |
+        | **Create** | `/users/register`                                                  | POST        | Tạo tài khoản người dùng mới       |
+        | **Read**   | `/users/login`, `/users/email/:email`, `/users/phone/:phoneNumber` | POST / GET  | Đăng nhập hoặc truy vấn người dùng |
+        | **Update** | `/users/:id`                                                       | PUT         | Cập nhật thông tin người dùng      |
+        | **Delete** | `/users/:id`                                                       | DELETE      | Xóa người dùng khỏi hệ thống       |
+
+
+```
+import { Controller, Post, Body, BadRequestException, Delete, Param, Put, Get } from "@nestjs/common";
+import { RegisterUserDto, LoginUserDto } from "./users.dto";
+import { UserService } from "./users.service";
+import { AuthService } from "../auth/auth.service";
+import { CartService } from "../cart/cart.service";
+
+
+@Controller('users')
+export class UserController {
+  constructor(private readonly userService: UserService,
+    private readonly authService: AuthService,
+    private readonly cartService: CartService
+  ) {}
+  @Post('register')
+  async register(@Body() dto: RegisterUserDto) {
+    const user  = await this.userService.register(dto.email, dto.password, dto.fullName, dto.phoneNumber, dto.address);
+    await this.cartService.ensureCart(user._id);
+    return { id: user._id, email: user.email, fullName: user.fullName, phoneNumber: user.phoneNumber, address: user.address };
+  }
+
+  @Post('login')
+  async login(@Body() dto: LoginUserDto) {
+    try {
+      const user = await this.userService.login(dto.email, dto.password);
+      return { userId: user.id, accessToken: user.accessToken, role: user.role, email: user.email, fullName: user.fullName};
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
+  }
+  @Delete(':id')
+  async deleteUser(@Param("id") id: string){
+    return this.userService.deleteUser(id);
+  }
+
+  @Put(':id')
+  async updateUser(@Param("id") id: string, @Body() body: any){
+    return this.userService.updateInfo(id, body);
+  }
+
+  @Get("email/:email")
+    async findByEmail(@Param("email") email: string) {
+      return this.userService.findByEmail(email);
+  }
+
+  @Get("phone/:phoneNumber")
+    async findByPhone(@Param("phoneNumber") phoneNumber: string) {
+      return this.userService.findByPhone(phoneNumber);
+  }
+}
+```
+
+* `users.module.ts`: 
+    * là module đóng gói toàn bộ nghiệp vụ của người dùng, bao gồm controller, service, schema và các module phụ trợ như `AuthModule` (xác thực JWT) và `CartModule` (khởi tạo giỏ hàng).
+```
+import { Module } from "@nestjs/common";
+import { UserController } from "./users.controller";
+import { UserService } from "./users.service";
+import { MongooseModule } from "@nestjs/mongoose";
+import { User, UserSchema } from "./users.schema";
+import { AuthModule } from "../auth/auth.module";
+import { CartModule } from "../cart/cart.module";
+
+@Module({
+    imports: [MongooseModule.forFeature([{name: User.name, schema: UserSchema}]), AuthModule, CartModule],
+    providers: [UserService],
+    controllers: [UserController],
+    exports: [UserService]
+})
+export class UserModule {}
+```
+
+### **Đó là những nội dung quan trọng thể hiện trong `user`, ngoài ra `cart`, `menu` ... hay `app.module.ts`, `main.ts` hay `.env` được luư trong repo github sau:**
+### https://github.com/QuangManhAI/Diep-s-Dream
+
+## 7. Container hóa dự án.
+* Như vậy ở đây em xin phép sẽ container hóa BE và FE cho dự án coffee shop. Thử CRUD `user` bằng một scripts `.bash` và cả giao diện Fontend.
+
+### 7.1 Dockerfile cho BE.
+```
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+RUN npm install --omit=dev
+COPY .env .env
+EXPOSE 3001
+CMD ["node", "dist/main.js"]
+```
+### 7.2 Dockerfile cho FE.
+```
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY package*.json ./
+RUN npm install --omit=dev
+EXPOSE 3000
+CMD ["npm", "run", "start"]
+```
+### 7.3 Docker Compose để quản lý nhiều container(BE và FE).
+```
+services:
+  backend:
+    build: ./coffee-backend
+    container_name: coffee-backend
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./coffee-backend/.env
+    networks:
+      - coffee_net
+
+  frontend:
+    build:
+      context: ./coffee-frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://backend:3001   
+    container_name: coffee-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:3001   
+    depends_on:
+      - backend
+    networks:
+      - coffee_net
+
+networks:
+  coffee_net:
+    driver: bridge
+```
+### 7.4 Bulid and Up
+* Sau khi có Dockerfile và docker-compose.yml thì chạy lệnh bash shell.
+
+    ```
+    sudo docker compose bulid
+    ```
+* Build thành công sẽ có log như sau:
+
+    !["Build Thành công"](anh_1.png)
+
+* Up bằng lệnh sau để tự động build image (từ Dockerfile trong mỗi thư mục) rồi tạo container tương ứng để chạy image đó.
+    ```
+    sudo docker compose up
+    ```
+    !["Up Thành công"](anh_2.png)
+* Sau đó viết một script để test CRUD - tạm trừ Delete ra không nó mất trong Database. 
+    * tạo file `test_user.sh`.
+    * dùng `cd /` di tới thư mục chứa file và dùng lệnh `chmod +x test_user.sh` và chạy với lệnh `./test_user.sh`
+    * email: nhuphamquangmanhlop9a1@gmail.com
+    * password: 200406
+    * role: user(mặc định)
+
+        ```
+        #!/bin/bash
+        BASE_URL="http://localhost:3001/users"
+        EMAIL="nhuphamquangmanhlop9a1@gmail.com"
+        PASS="200406"
+
+        REGISTER_RESPONSE=$(curl -s -X POST "$BASE_URL/register" \
+        -H "Content-Type: application/json" \
+        -d @- <<JSON
+        {
+        "email": "$EMAIL",
+        "password": "$PASS",
+        "fullName": "Nhu Pham Quang Manh",
+        "phoneNumber": "0345552262",
+        "address": "Diep's Dream Coffee"
+        }
+        JSON
+        )
+        USER_ID=$(echo "$REGISTER_RESPONSE" | grep -oE '"id":"[^"]+' | cut -d'"' -f4)
+
+        LOGIN_RESPONSE=$(curl -s -X POST "$BASE_URL/login" \
+        -H "Content-Type: application/json" \
+        -d @- <<JSON
+        {"email":"$EMAIL","password":"$PASS"}
+        JSON
+        )
+        ACCESS_TOKEN=$(echo "$LOGIN_RESPONSE" | grep -oE '"accessToken":"[^"]+' | cut -d'"' -f4)
+
+        UPDATE_RESPONSE=$(curl -s -X PUT "$BASE_URL/$USER_ID" \
+        -H "Content-Type: application/json" \
+        -d @- <<JSON
+        {"fullName":"User Updated","address":"456 Updated Street"}
+        JSON
+        )
+
+        GET_RESPONSE=$(curl -s -X GET "$BASE_URL/email/$EMAIL")
+
+        echo "REGISTER RESPONSE: $REGISTER_RESPONSE"
+        echo "LOGIN RESPONSE: $LOGIN_RESPONSE"
+        echo "UPDATE RESPONSE: $UPDATE_RESPONSE"
+        echo "GET RESPONSE: $GET_RESPONSE"
+        ```
+
+        !["Test Thành công"](anh_3.png)
+* Kết quả trong DB:
+    ```
+    {
+    "email": "nhuphamquangmanhlop9a1@gmail.com",
+    "passwordHash": "$2b$10$trqciQrniEmynyGG5oJozOyae0/f9azkDrGG83EBhL6SZ1delxmd2",
+    "fullName": "User Updated",
+    "phoneNumber": "0345552262",
+    "address": "456 Updated Street",
+    "role": "user",
+    "createdAt": {
+        "$date": "2025-10-22T10:48:34.081Z"
+    },
+    "updatedAt": {
+        "$date": "2025-10-22T10:48:34.616Z"
+    },
+    "__v": 0
+    }
+    ```
+* Đăng nhập thử trên FE:
+    * Trang chủ -> bấm đăng nhập:
+
+        !["home"](home.png)
+    
+    * Nhập thông tin đúng email và mật khẩu:
+
+        !["login](login.png)
+
+    * Thành công vào trong Menu:
+
+        !["menu](menu.png)

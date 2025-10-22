@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 type MenuItem = {
   id: string;
@@ -36,20 +36,17 @@ export default function MenuPage() {
   
   const router = useRouter();
 
-  // === FETCH MENU ===
   async function fetchMenu() {
     const res = await fetch(`${BASE_URL}/menu`);
     const data = await res.json();
     setMenu(data);
   }
 
-  // === ADD TO CART ===
   async function addToCart(item: MenuItem) {
     const token = sessionStorage.getItem("accessToken");
 
-    // 🧱 1️⃣ Nếu chưa đăng nhập
     if (!token) {
-      toast.error("⚠️ Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
       setTimeout(() => router.push("/login"), 1500);
       return;
     }
@@ -77,22 +74,22 @@ export default function MenuPage() {
           sessionStorage.removeItem("accessToken");
           setTimeout(() => router.push("/login"), 1500);
         } else {
-          throw new Error(`❌ Lỗi ${res.status}: ${text}`);
+          throw new Error(`Lỗi ${res.status}: ${text}`);
         }
         return;
       }
 
-      toast.success(`☕ Đã thêm "${item.name}" vào giỏ hàng!`);
+      toast.success(`Đã thêm "${item.name}" vào giỏ hàng!`);
     } catch (e: any) {
       console.error("Lỗi khi thêm vào giỏ hàng:", e);
-      toast.error(e.message || "❌ Có lỗi xảy ra khi thêm vào giỏ hàng!");
+      toast.error(e.message || "Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
   }
 
   async function updateMenuItem(id: string, data: any) {
     const token = sessionStorage.getItem("accessToken");
     if (!token) {
-      toast.error("⚠️ Bạn chưa đăng nhập với quyền admin!");
+      toast.error("Bạn chưa đăng nhập với quyền admin!");
       return;
     }
 
@@ -107,7 +104,7 @@ export default function MenuPage() {
       });
 
       if (!res.ok) throw new Error("Cập nhật thất bại!");
-      toast.success("✅ Cập nhật thành công!");
+      toast.success("Cập nhật thành công!");
       await fetchMenu();
     } catch (err: any) {
       toast.error(err.message || "Không thể cập nhật món!");
@@ -212,7 +209,7 @@ export default function MenuPage() {
           onClick={() => addToCart(item)}
           className="w-full bg-amber-700 hover:bg-amber-800 text-white py-2 rounded-full text-sm font-semibold transition"
         >
-          🛒 Thêm vào giỏ
+          Thêm vào giỏ hàng
         </button>
       </div>
     ))

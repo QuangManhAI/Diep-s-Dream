@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-const BASE_URL = "http://localhost:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export default function AdminPage() {
   const router = useRouter();
@@ -21,7 +21,6 @@ export default function AdminPage() {
     available: true,
   });
 
-  // 🧾 state edit modal
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({
     name: "",
@@ -30,7 +29,6 @@ export default function AdminPage() {
     imagePath: "",
   });
 
-  // 🧠 Kiểm tra quyền admin
   useEffect(() => {
     const token = sessionStorage.getItem("accessToken");
     const role = sessionStorage.getItem("role");
@@ -43,7 +41,6 @@ export default function AdminPage() {
     fetchOrders();
   }, []);
 
-  // 📦 Lấy danh sách menu
   async function fetchMenu() {
     try {
       const res = await fetch(`${BASE_URL}/menu`);
@@ -56,7 +53,6 @@ export default function AdminPage() {
     }
   }
 
-  // 📜 Lấy danh sách đơn hàng
   async function fetchOrders() {
     try {
       const token = sessionStorage.getItem("accessToken");
@@ -70,7 +66,6 @@ export default function AdminPage() {
     }
   }
 
-  // 🔍 Tìm kiếm đơn hàng
   async function searchOrders(query: string) {
     try {
       const token = sessionStorage.getItem("accessToken");
@@ -86,7 +81,6 @@ export default function AdminPage() {
     }
   }
 
-  // ➕ Thêm món mới
   async function addMenuItem(e: any) {
     e.preventDefault();
     try {
@@ -103,7 +97,7 @@ export default function AdminPage() {
         }),
       });
       if (!res.ok) throw new Error("Thêm món thất bại!");
-      alert("✅ Đã thêm món mới!");
+      alert("Đã thêm món mới!");
       setNewItem({
         name: "",
         price: "",
@@ -117,7 +111,6 @@ export default function AdminPage() {
     }
   }
 
-  // ✏️ Mở popup sửa món
   function openEdit(item: any) {
     setEditingItem(item);
     setEditForm({
@@ -128,7 +121,6 @@ export default function AdminPage() {
     });
   }
 
-  // 💾 Lưu món đã chỉnh sửa
   async function saveEdit() {
     try {
       const token = sessionStorage.getItem("accessToken");
@@ -144,7 +136,7 @@ export default function AdminPage() {
         }),
       });
       if (!res.ok) throw new Error("Cập nhật thất bại!");
-      alert("✅ Đã cập nhật món!");
+      alert("Đã cập nhật món!");
       setEditingItem(null);
       fetchMenu();
     } catch (err: any) {
@@ -152,7 +144,6 @@ export default function AdminPage() {
     }
   }
 
-  // 🗑 Xóa món
   async function deleteMenuItem(id: string) {
     if (!confirm("Bạn có chắc muốn xóa món này?")) return;
     try {
@@ -168,8 +159,6 @@ export default function AdminPage() {
       alert(err.message);
     }
   }
-
-  // 🔄 Cập nhật trạng thái đơn hàng
   async function updateStatus(id: string, status: string) {
     try {
       const token = sessionStorage.getItem("accessToken");
@@ -182,21 +171,20 @@ export default function AdminPage() {
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error("Không thể cập nhật trạng thái!");
-      alert("✅ Đã cập nhật trạng thái đơn!");
+      alert("Đã cập nhật trạng thái đơn!");
       fetchOrders();
     } catch (err: any) {
       alert(err.message);
     }
   }
 
-  // 🧱 Giao diện chính
   return (
     <main className="min-h-screen bg-[#faf7f3] text-[#2F2A2C] flex flex-col">
       {/* HEADER */}
       <header className="flex justify-between items-center w-full px-8 py-4 border-b border-gray-200 bg-white sticky top-0 z-50">
         <div className="flex items-center space-x-2">
           <Image src="/coffee_chi_yeu_logo(2).png" alt="Điệp's Dream" width={42} height={42} />
-          <span className="font-semibold text-lg">☕ Admin Dashboard</span>
+          <span className="font-semibold text-lg">Admin Dashboard</span>
         </div>
         <button onClick={() => router.push("/menu")} className="text-sm text-amber-700 hover:underline">
           ← Quay lại Menu
@@ -213,7 +201,7 @@ export default function AdminPage() {
               : "bg-white text-amber-700 border border-amber-300"
           }`}
         >
-          📋 Quản lý Menu
+          Quản lý Menu
         </button>
         <button
           onClick={() => setActiveTab("orders")}
@@ -223,7 +211,7 @@ export default function AdminPage() {
               : "bg-white text-amber-700 border border-amber-300"
           }`}
         >
-          📦 Đơn hàng
+          Đơn hàng
         </button>
       </div>
 
@@ -238,7 +226,7 @@ export default function AdminPage() {
               onSubmit={addMenuItem}
               className="max-w-2xl mx-auto bg-white shadow rounded-xl p-6 mb-6 space-y-4"
             >
-              <h2 className="text-lg font-semibold text-amber-800">➕ Thêm món mới</h2>
+              <h2 className="text-lg font-semibold text-amber-800">Thêm món mới</h2>
               <input
                 type="text"
                 placeholder="Tên món"
@@ -267,13 +255,13 @@ export default function AdminPage() {
                 onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
                 className="border px-3 py-2 rounded-md w-full"
               >
-                <option value="coffee">☕ Coffee</option>
-                <option value="drink">🍹 Drink</option>
-                <option value="food">🍜 Food</option>
-                <option value="matcha">🍵 Matcha</option>
+                <option value="coffee">Coffee</option>
+                <option value="drink">Drink</option>
+                <option value="food">Food</option>
+                <option value="matcha">Matcha</option>
               </select>
               <button type="submit" className="w-full bg-amber-700 hover:bg-amber-800 text-white py-2 rounded-md">
-                ✅ Thêm món
+                Thêm món
               </button>
             </form>
 
@@ -291,13 +279,13 @@ export default function AdminPage() {
                       onClick={() => openEdit(m)}
                       className="flex-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 py-1 rounded-md text-sm"
                     >
-                      ✏️ Sửa
+                      Sửa
                     </button>
                     <button
                       onClick={() => deleteMenuItem(m._id)}
                       className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 py-1 rounded-md text-sm"
                     >
-                      🗑 Xóa
+                      Xóa
                     </button>
                   </div>
                 </div>
@@ -307,7 +295,7 @@ export default function AdminPage() {
         ) : (
           // ==== QUẢN LÝ ĐƠN HÀNG ====
           <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6">
-            <h2 className="text-lg font-semibold text-amber-800 mb-4">🧾 Quản lý đơn hàng</h2>
+            <h2 className="text-lg font-semibold text-amber-800 mb-4">Quản lý đơn hàng</h2>
             <div className="mb-6 flex gap-3 justify-center">
               <input
                 type="text"
@@ -329,13 +317,13 @@ export default function AdminPage() {
                 }}
                 className="px-4 py-2 bg-amber-700 text-white rounded-md hover:bg-amber-800"
               >
-                🔍 Tìm kiếm
+                Tìm kiếm
               </button>
               <button
                 onClick={fetchOrders}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
               >
-                🧹 Làm mới
+                Làm mới
               </button>
             </div>
 
@@ -369,8 +357,8 @@ export default function AdminPage() {
                     ))}
                   </div>
                   <div className="flex justify-between items-center mt-3 text-sm text-gray-600">
-                    <span>📞 {o.phoneNumber || "Không rõ"}</span>
-                    <span>🕒 {new Date(o.createdAt).toLocaleString("vi-VN")}</span>
+                    <span>{o.phoneNumber || "Không rõ"}</span>
+                    <span>{new Date(o.createdAt).toLocaleString("vi-VN")}</span>
                     <span className="font-semibold text-amber-800">Tổng: {o.total}k</span>
                   </div>
                   <div className="mt-3 flex gap-2">
@@ -399,7 +387,7 @@ export default function AdminPage() {
       {editingItem && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-96 shadow-xl">
-            <h2 className="text-lg font-semibold text-amber-800 mb-4">✏️ Chỉnh sửa món</h2>
+            <h2 className="text-lg font-semibold text-amber-800 mb-4">Chỉnh sửa món</h2>
             <div className="space-y-3">
               <input
                 type="text"
@@ -427,10 +415,10 @@ export default function AdminPage() {
                 onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                 className="w-full border px-3 py-2 rounded-md"
               >
-                <option value="coffee">☕ Coffee</option>
-                <option value="drink">🍹 Drink</option>
-                <option value="food">🍜 Food</option>
-                <option value="matcha">🍵 Matcha</option>
+                <option value="coffee">Coffee</option>
+                <option value="drink">Drink</option>
+                <option value="food">Food</option>
+                <option value="matcha">Matcha</option>
               </select>
             </div>
             <div className="flex justify-between mt-5">

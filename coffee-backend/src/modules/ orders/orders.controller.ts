@@ -19,7 +19,6 @@ export class OrdersController {
   @Roles("admin")
   @Get()
   async getAllOrders() {
-    console.log("📦 [Admin] getAllOrders called");
     return this.service.findAllOrders(); 
   }
 
