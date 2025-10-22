@@ -443,6 +443,12 @@ networks:
 * Build thành công sẽ có log như sau:
 
     !["Build Thành công"](anh_1.png)
+* Kiểm tra bằng lệnh:
+    ```
+    sudo docker ps
+    ```
+
+    !["check"](anh_4.png)
 
 * Up bằng lệnh sau để tự động build image (từ Dockerfile trong mỗi thư mục) rồi tạo container tương ứng để chạy image đó.
     ```
