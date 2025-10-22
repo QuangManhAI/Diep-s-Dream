@@ -16,8 +16,8 @@
     ***-> Và DevOps mang trong mình giải pháp để chấm dứt nỗi đau hiện tại khi phát triển và vận hành sản phẩm gồm 3 trụ cột là CI/CD - Automation - Monitoring/Observability.***
 ## 3. Giải pháp DevOps 3 trụ cột.
 ### 3.1 CI/CD - Tự động kiểm tra và đưa phiên bản mới ra.
-* CI (Continous intergrated): Mỗi lần đẩy code lên là máy tự build và chạy kiểm thử. Nếu ổn mới cho phép gộp code.
-* CD (Contious Develop): khi đã được thông qua, phiên bản sẵn sàng đưa lên môi trường chạy. Có thể đưa dần một lượng nhỏ user thử nghiệm trước để an tòan.
+* CI (Continnuous intergration): Mỗi lần đẩy code lên là máy tự build và chạy kiểm thử. Nếu ổn mới cho phép gộp code.
+* CD (Continuous Development): khi đã được thông qua, phiên bản sẵn sàng đưa lên môi trường chạy. Có thể đưa dần một lượng nhỏ user thử nghiệm trước để an tòan.
 ### 3.2 Automation - Tự động hóa.
 * Mọi công việc lặp lại như build - test - cài đặt ... đều được viết thành kịch bản - scripts. Như thế, dù là bất kì ai chạy đều cho ra một kết quả như nhau. Có sự kiểm soát theo kịch bản.
 ### 3.3 Giám sát - Monitoring/Observability.
@@ -27,6 +27,7 @@
 * Giảm lỗi do thao tác bằng tay nhờ vào Automation.
 * Nhờ monitoring phát hiện sớm sự cố, xử lý nhanh, đo đạc chính xác nơi cần thiết.
 * Dễ quay lại phiên bản trước hơn nhờ việc đóng gói (build) thường xuyên.
+* Nhóm phát triển và vận hành có thể phối hợp dễ dàng hơn nhờ cùng sử dụng một quy trình và cùng giám sát hệ thống thông qua dữ liệu thực tế.
 
 ***-> Chung quy lại, DevOps thực hiện mục tiêu xây dựng một đường ray tự động. Code cứ đi qua các trạm soát chính là các cổng kiểm tra. An tòan thì đưa lên để gộp và chạy. Nếu có vấn đề thì, quay về phiên bản cũ, không gộp hay chạy code. Đường ray dựa trên 3 trụ cột và cũng chính là giải pháp cho nỗi đau hiện tại khi phát triển và vận hành sản phẩm.***
 
@@ -501,22 +502,23 @@ networks:
         !["Test Thành công"](anh_3.png)
 * Kết quả trong DB:
     ```
-    {
-    "email": "nhuphamquangmanhlop9a1@gmail.com",
-    "passwordHash": "$2b$10$trqciQrniEmynyGG5oJozOyae0/f9azkDrGG83EBhL6SZ1delxmd2",
-    "fullName": "User Updated",
-    "phoneNumber": "0345552262",
-    "address": "456 Updated Street",
-    "role": "user",
-    "createdAt": {
-        "$date": "2025-10-22T10:48:34.081Z"
-    },
-    "updatedAt": {
-        "$date": "2025-10-22T10:48:34.616Z"
-    },
-    "__v": 0
-    }
+            {
+            "email": "nhuphamquangmanhlop9a1@gmail.com",
+            "passwordHash": "$2b$10$trqciQrniEmynyGG5oJozOyae0/f9azkDrGG83EBhL6SZ1delxmd2",
+            "fullName": "User Updated",
+            "phoneNumber": "0345552262",
+            "address": "456 Updated Street",
+            "role": "user",
+            "createdAt": {
+                "$date": "2025-10-22T10:48:34.081Z"
+            },
+            "updatedAt": {
+                "$date": "2025-10-22T10:48:34.616Z"
+            },
+            "__v": 0
+            }
     ```
+
 * Đăng nhập thử trên FE:
     * Trang chủ -> bấm đăng nhập:
 
@@ -529,3 +531,51 @@ networks:
     * Thành công vào trong Menu:
 
         !["menu](menu.png)
+
+## 8. Bài báo về CI/CD cho Machine Learning
+
+### 8.1 Tiêu đề bài báo và tổng quan giới thiệu
+
+#### **A Review on Continuous Integration and Continuous Deployment (CI/CD) for Machine Learning** – *Ankur Mahida*
+
+Học máy (Machine Learning – ML) đang đóng vai trò quan trọng trong nhiều lĩnh vực như y tế, tài chính, bán lẻ và giao thông vận tải. Tuy nhiên, việc phát triển và triển khai các mô hình ML phức tạp hơn nhiều so với phần mềm truyền thống do phải xử lý luồng dữ liệu lớn, huấn luyện mô hình lặp lại và liên tục giám sát, cập nhật. Một dự án ML có chu trình khép kín từ xử lý dữ liệu đến huấn luyện và đánh giá, vì vậy CI/CD có thể được xem như một giải pháp tiềm năng giúp tự động hóa toàn bộ vòng đời mô hình, tăng cường hợp tác, rút ngắn chu kỳ phát hành và nâng cao chất lượng mô hình trong môi trường sản xuất.
+
+Một số vấn đề cố hữu trong phát triển ML:
+
+* **Tiền xử lý dữ liệu và kỹ thuật đặc trưng:** dữ liệu thô thường nhiễu, thiếu hoặc không nhất quán, cần quy trình làm sạch và chọn đặc trưng đáng tin cậy.
+* **Huấn luyện và đánh giá:** các mô hình lớn (như mạng nơ-ron sâu) tốn thời gian, tài nguyên và cần thử nhiều cấu hình, siêu tham số.
+* **Hợp tác và kiểm soát phiên bản:** nhiều nhóm như nhà khoa học dữ liệu, kỹ sư và chuyên gia miền cần phối hợp chặt chẽ khi quản lý mã, dữ liệu và mô hình.
+
+**-> Các phương pháp phát triển phần mềm truyền thống không còn đủ; cần CI/CD để tự động hóa và kết nối các khâu.**
+
+### 8.2 Giải pháp được đề xuất
+
+CI/CD mang đến quy trình tự động hóa toàn diện cho ML:
+
+* **Tiền xử lý và đặc trưng:** tạo pipeline tự động để làm sạch, chuẩn hóa và chọn đặc trưng, giảm lỗi và đảm bảo nhất quán.
+* **Huấn luyện và đánh giá:** pipeline CI/CD tự động huấn luyện lại khi có thay đổi mã hoặc dữ liệu, hỗ trợ tìm kiếm siêu tham số và đánh giá mô hình tự động.
+* **Triển khai và giám sát:** mô hình được triển khai tự động qua các môi trường staging và production; tích hợp giám sát drift và cảnh báo tái huấn luyện.
+* **Hợp tác và kiểm soát phiên bản:** kết hợp Git giúp theo dõi mã, dữ liệu, mô hình, tăng khả năng cộng tác và tái hiện kết quả.
+
+### 8.3 Ứng dụng và tác động
+
+Việc áp dụng CI/CD vào quy trình phát triển ML mang lại nhiều lợi ích rõ rệt:
+
+1. **Rút ngắn thời gian ra thị trường:** quy trình build, train và deploy tự động giảm đáng kể thời gian phát hành.
+2. **Cải thiện hợp tác:** nhờ kiểm soát phiên bản và lưu trữ tập trung.
+3. **Tăng chất lượng và độ tin cậy:** kiểm thử tự động giúp phát hiện lỗi sớm.
+4. **Mở rộng và tái tạo:** pipeline có thể chạy song song, tái tạo trên nhiều môi trường và bộ dữ liệu.
+5. **Tối ưu hóa chi phí:** giảm thao tác thủ công, tận dụng hạ tầng hiệu quả, tự động huấn luyện và giám sát.
+
+Nhờ đó, doanh nghiệp đạt hiệu suất cao hơn, sản phẩm ổn định hơn và tạo ra giá trị kinh doanh lớn hơn.
+
+### 8.4 Phạm vi và thực hành tốt nhất
+
+CI/CD bao trùm toàn bộ vòng đời của dự án ML – từ chuẩn bị dữ liệu, huấn luyện, triển khai đến giám sát. Một số thực hành tốt được khuyến nghị:
+
+1. **Tự động hóa pipeline dữ liệu:** đảm bảo tính nhất quán trong tiền xử lý và kỹ thuật đặc trưng.
+2. **Container hóa và kiểm soát phiên bản:** sử dụng Docker và Git để duy trì môi trường ổn định và dễ tái tạo.
+3. **Tích hợp và kiểm thử liên tục:** phát hiện lỗi sớm trong mã nguồn và mô hình.
+4. **Tự động hóa huấn luyện và đánh giá:** cho phép chạy song song nhiều cấu hình và siêu tham số.
+
+Việc áp dụng các phương pháp này giúp tổ chức đạt được quy trình ML ổn định, có thể mở rộng và dễ bảo trì, đồng thời đảm bảo chất lượng mô hình cao và khả năng triển khai linh hoạt trong môi trường thực tế.
