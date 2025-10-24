@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import toast from "react-hot-toast";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
@@ -49,17 +51,16 @@ export default function ProfilePage() {
     }
   }
 
-    async function fetchOrders(token: string) {
+  async function fetchOrders(token: string) {
     try {
-        const res = await fetch(`${BASE_URL}/Order/my`, {
+      const res = await fetch(`${BASE_URL}/Order/my`, {
         headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) setOrders(await res.json());
+      });
+      if (res.ok) setOrders(await res.json());
     } catch {
-        toast.error("Không thể tải lịch sử đơn hàng!");
+      toast.error("Không thể tải lịch sử đơn hàng!");
     }
-    }
-
+  }
 
   async function updateInfo() {
     if (!user) return;
@@ -139,7 +140,8 @@ export default function ProfilePage() {
     );
   }
 
-  const token = typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : null;
+  const token =
+    typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : null;
   if (!token || !user) {
     return (
       <main className="flex min-h-screen items-center justify-center text-gray-600">
@@ -149,10 +151,61 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#faf7f3] text-[#2F2A2C] flex flex-col items-center justify-between">
-      <div className="w-full flex-1 p-8 flex flex-col items-center">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-4xl flex gap-8">
-          {/*Avatar */}
+    <main className="min-h-screen bg-[#faf7f3] text-[#2F2A2C] flex flex-col">
+      
+{/* HEADER — sáng, đồng bộ toàn site */}
+<header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-amber-100 shadow-sm">
+  <div className="max-w-7xl mx-auto px-6 md:px-10 py-4 flex justify-between items-center">
+    {/* Logo + Brand */}
+    <div className="flex items-center space-x-3">
+      <Image
+        src="/coffee_chi_yeu_logo(2).png"
+        alt="Điệp's Dream Logo"
+        width={44}
+        height={44}
+        className="object-contain drop-shadow-sm"
+      />
+      <span className="font-serif text-[1.3rem] tracking-wide text-[#3a2a1a] select-none">
+        Điệp&apos;s <span className="italic text-amber-700">Dream</span>
+      </span>
+    </div>
+
+    {/* Navigation */}
+    <nav className="hidden md:flex items-center space-x-8 text-[0.95rem] font-medium text-[#3a2a1a]">
+      <Link
+        href="/"
+        className="hover:text-amber-700 transition-colors duration-200"
+      >
+        Trang chủ
+      </Link>
+      <Link
+        href="/menu"
+        className="hover:text-amber-700 transition-colors duration-200"
+      >
+        Menu
+      </Link>
+      <Link
+        href="/profile"
+        className="text-amber-700 font-semibold"
+      >
+        Hồ sơ
+      </Link>
+      <button
+        onClick={logout}
+        className="bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white px-4 py-1.5 rounded-full font-semibold transition"
+      >
+        Đăng xuất
+      </button>
+    </nav>
+  </div>
+</header>
+
+
+      {/* Nội dung chính */}
+      <div className="flex-1 pt-28 px-6 md:px-10 flex flex-col items-center">
+        {/* Avatar + Info */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-4xl flex flex-col md:flex-row gap-8">
+          {/* Avatar */}
           <div className="flex-shrink-0 flex flex-col items-center">
             <img
               src="/Gemini_Generated_Image_8rmho48rmho48rmh.png"
@@ -161,84 +214,40 @@ export default function ProfilePage() {
             />
             <p className="mt-3 font-semibold text-amber-800">{user.fullName}</p>
             <p className="text-sm text-gray-500">{user.role}</p>
-
-            <div className="flex flex-col gap-2 mt-4">
-              <button
-                onClick={logout}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-1 rounded-md text-sm"
-              >
-                Đăng xuất
-              </button>
-              <button
-                onClick={deleteAccount}
-                className="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-1 rounded-md text-sm"
-              >
-                Xóa tài khoản
-              </button>
-            </div>
           </div>
 
-          {/*Thông tin người dùng */}
+          {/* Thông tin người dùng */}
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-amber-800 mb-4">
               Thông tin tài khoản
             </h1>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <label>
-                <span className="block text-sm text-gray-600">Họ và tên</span>
-                <input
-                  type="text"
-                  value={user.fullName}
-                  onChange={(e) =>
-                    setUser({ ...user, fullName: e.target.value })
-                  }
-                  readOnly={!editing}
-                  className={`w-full border rounded-lg px-3 py-2 ${
-                    editing ? "bg-white border-amber-600" : "bg-gray-100"
-                  }`}
-                />
-              </label>
-
-              <label>
-                <span className="block text-sm text-gray-600">Email</span>
-                <input
-                  type="email"
-                  value={user.email}
-                  readOnly
-                  className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-500"
-                />
-              </label>
-
-              <label>
-                <span className="block text-sm text-gray-600">Số điện thoại</span>
-                <input
-                  type="tel"
-                  value={user.phoneNumber}
-                  onChange={(e) =>
-                    setUser({ ...user, phoneNumber: e.target.value })
-                  }
-                  readOnly={!editing}
-                  className={`w-full border rounded-lg px-3 py-2 ${
-                    editing ? "bg-white border-amber-600" : "bg-gray-100"
-                  }`}
-                />
-              </label>
-
-              <label>
-                <span className="block text-sm text-gray-600">Địa chỉ</span>
-                <input
-                  type="text"
-                  value={user.address}
-                  onChange={(e) =>
-                    setUser({ ...user, address: e.target.value })
-                  }
-                  readOnly={!editing}
-                  className={`w-full border rounded-lg px-3 py-2 ${
-                    editing ? "bg-white border-amber-600" : "bg-gray-100"
-                  }`}
-                />
-              </label>
+              {/* Các input */}
+              {[
+                { label: "Họ và tên", key: "fullName" },
+                { label: "Email", key: "email", readonly: true },
+                { label: "Số điện thoại", key: "phoneNumber" },
+                { label: "Địa chỉ", key: "address" },
+              ].map(({ label, key, readonly }) => (
+                <label key={key}>
+                  <span className="block text-sm text-gray-600">{label}</span>
+                  <input
+                    type="text"
+                    value={(user as any)[key] || ""}
+                    onChange={(e) =>
+                      !readonly &&
+                      setUser({ ...user, [key]: e.target.value } as User)
+                    }
+                    readOnly={readonly || !editing}
+                    className={`w-full border rounded-lg px-3 py-2 ${
+                      editing && !readonly
+                        ? "bg-white border-amber-600"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                  />
+                </label>
+              ))}
             </div>
 
             <div className="flex gap-4 mt-6">
@@ -324,7 +333,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <footer className="w-full py-6 bg-[#2c1a0c] text-center text-gray-200 text-sm">
+      {/* FOOTER */}
+      <footer className="w-full py-6 bg-[#2c1a0c] text-center text-gray-200 text-sm mt-10">
         © {new Date().getFullYear()} Điệp&apos;s Dream Coffee & More.  
         Tất cả các quyền được bảo lưu.
       </footer>
