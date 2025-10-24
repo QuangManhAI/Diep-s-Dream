@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { UserMenu } from "../../components/page";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+console.log("🔍 ENV NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+console.log("🧭 MenuPage mounted");
+
 
 type MenuItem = {
   id: string;
@@ -22,10 +25,20 @@ export default function MenuPage() {
   const router = useRouter();
 
   async function fetchMenu() {
+    console.log("🌐 Fetching from:", `${BASE_URL}/menu`);
     const res = await fetch(`${BASE_URL}/menu`);
-    const data = await res.json();
-    setMenu(data);
+    console.log("📡 Response status:", res.status);
+    const text = await res.text();
+    console.log("📄 Raw text:", text.slice(0, 200));
+    try {
+      const data = JSON.parse(text);
+      console.log("✅ Parsed JSON length:", data.length);
+      setMenu(data);
+    } catch (e) {
+      console.error("❌ JSON parse error:", e);
+    }
   }
+
 
   useEffect(() => {
     fetchMenu();
